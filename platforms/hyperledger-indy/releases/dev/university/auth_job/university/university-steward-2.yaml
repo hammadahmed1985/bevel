@@ -1,0 +1,40 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: university-university-steward-2-auth-job
+  annotations:
+    fluxcd.io/automated: "false"
+  namespace: university-ns
+spec:
+  releaseName: university-university-steward-2-auth-job
+  interval: 1m
+  chart:
+   spec:
+    chart: platforms/hyperledger-indy/charts/indy-auth-job
+    sourceRef:
+      kind: GitRepository
+      name: flux-bevel
+      namespace: flux-bevel
+  values:
+    metadata:
+      name: university-university-steward-2-auth-job
+      namespace: university-ns
+    network:
+      name: bevel
+      kubernetes_url: https://192.168.49.2:8443
+    image:
+      name: university
+      repository: alpine:3.9.4
+      pullPolicy: IfNotPresent
+    vault:
+      address: http://192.168.49.1:8200
+      identity: university-steward-2
+      admin_auth_path: kubernetes-university-admin-auth
+      policy: university-university-steward-2-ro
+      policy_content: path \"/university/data/stewards/university-steward-2/*\" { capabilities = [ \"read\", \"list\" ] }
+      auth_path: kubernetes-university-university-steward-2-auth
+    account:
+      admin_service: university-admin-vault-auth
+      admin_role: rw
+      service: university-university-steward-2-vault-auth
+      role: ro

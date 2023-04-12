@@ -1,0 +1,40 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: university-bevel-ac-auth-job
+  annotations:
+    fluxcd.io/automated: "false"
+  namespace: university-ns
+spec:
+  releaseName: university-bevel-ac-auth-job
+  interval: 1m
+  chart:
+   spec:
+    chart: platforms/hyperledger-indy/charts/indy-auth-job
+    sourceRef:
+      kind: GitRepository
+      name: flux-bevel
+      namespace: flux-bevel
+  values:
+    metadata:
+      name: university-bevel-ac-auth-job
+      namespace: university-ns
+    network:
+      name: bevel
+      kubernetes_url: https://192.168.49.2:8443
+    image:
+      name: university
+      repository: alpine:3.9.4
+      pullPolicy: IfNotPresent
+    vault:
+      address: http://192.168.49.1:8200
+      identity: bevel-ac
+      admin_auth_path: kubernetes-university-admin-auth
+      policy: university-bevel-ac-ro
+      policy_content: path \"/university/data/+/+/+/public*\" { capabilities = [ \"read\", \"list\" ] }
+      auth_path: kubernetes-university-bevel-ac-auth
+    account:
+      admin_service: university-admin-vault-auth
+      admin_role: rw
+      service: university-bevel-ac-vault-auth
+      role: ro
