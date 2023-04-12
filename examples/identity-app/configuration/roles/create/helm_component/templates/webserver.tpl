@@ -29,7 +29,7 @@ spec:
         repository: alpine:3.9.4
       server:
         name: {{ component_name }}
-        repository: {{ network.docker.url }}/von-network-base:{{ network.version }}
+        repository: index.docker.io/hammadahmed85/von-network-base:latest
     service:
       port: {{ component_port }}
     vault:

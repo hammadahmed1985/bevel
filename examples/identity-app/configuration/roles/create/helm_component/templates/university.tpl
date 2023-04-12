@@ -29,7 +29,7 @@ spec:
         repository: alpine:3.9.4
       agent:
         name: {{ component_name }}
-        repository: {{ network.docker.url }}/aries-agents:{{ network.version }}
+        repository: index.docker.io/hammadahmed85/aries-agents:latest
     service:
       ports:
         service: {{ endorser.server.httpPort }}

@@ -1,0 +1,47 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: authority-webserver
+  annotations:
+    fluxcd.io/automated: "false"
+  namespace: authority-ns
+spec:
+  releaseName: authority-webserver
+  interval: 1m
+  chart:
+   spec:
+    chart: examples/identity-app/charts/webserver
+    sourceRef:
+      kind: GitRepository
+      name: flux-bevel
+      namespace: flux-bevel
+  values:
+    metadata:
+      namespace: authority-ns
+      name: authority-webserver
+    organization:
+      name: authority
+    image:
+      pullSecret: regcred
+      pullPolicy: IfNotPresent
+      init:
+        name: authority-webserver-init
+        repository: alpine:3.9.4
+      server:
+        name: authority-webserver
+        repository: index.docker.io/hammadahmed85/von-network-base:latest
+    service:
+      port: 8000
+    vault:
+      address: http://192.168.49.1:8200
+      serviceAccountName: authority-authority-trustee-vault-auth
+      authPath: kubernetes-authority-authority-trustee-auth
+      trusteeName: authority-trustee
+      role: ro
+    storage:
+      size: 128Mi
+      className: authority-minikube-storageclass
+    proxy:
+      provider: "minikube"
+      external_url:
+      port: 15010
