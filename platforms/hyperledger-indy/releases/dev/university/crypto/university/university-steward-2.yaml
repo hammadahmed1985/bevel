@@ -1,0 +1,38 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: university-university-steward-2
+  annotations:
+    fluxcd.io/automated: "false"
+  namespace: university-ns
+spec:
+  releaseName: university-university-steward-2
+  interval: 1m
+  chart:
+   spec:
+    chart: platforms/hyperledger-indy/charts/indy-key-mgmt
+    sourceRef:
+      kind: GitRepository
+      name: flux-bevel
+      namespace: flux-bevel
+  values:
+    metadata:
+      name: university-university-steward-2
+      namespace: university-ns
+    network:
+      name: bevel
+    image:
+      name: university
+      repository: index.docker.io/hyperledgerlabs/indy-key-mgmt:1.11.0
+      pullSecret: regcred
+      pullPolicy: IfNotPresent
+    vault:
+      address: http://192.168.49.1:8200
+      version: "2"
+      keyPath: university.stewards
+      identity: university-steward-2
+      auth_path: kubernetes-university-admin-auth
+      certsecretprefix: university
+    account:
+      service: university-admin-vault-auth
+      role: rw
