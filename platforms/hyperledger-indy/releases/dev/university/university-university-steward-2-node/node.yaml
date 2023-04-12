@@ -1,0 +1,93 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: university-university-steward-2-node
+  annotations:
+    fluxcd.io/automated: "false"
+  namespace: university-ns
+spec:
+  releaseName: university-university-steward-2-node
+  interval: 1m
+  chart:
+   spec:
+    chart: platforms/hyperledger-indy/charts/indy-node
+    sourceRef:
+      kind: GitRepository
+      name: flux-bevel
+      namespace: flux-bevel
+  values:
+    metadata:
+      name: university-university-steward-2-node
+      namespace: university-ns
+    network:
+      name: bevel
+    organization:
+      name: university
+    add_new_org: False
+    image:
+      pullSecret: regcred
+      pullPolicy: IfNotPresent
+      initContainer:
+        name: university-university-steward-2-node-init
+        repository: alpine:3.9.4
+      cli:
+        name: university-university-steward-2-node-ledger-txn
+        repository: index.docker.io/hyperledgerlabs/indy-ledger-txn:latest
+        pullSecret: regcred
+      indyNode:
+        name: university-university-steward-2-node
+        repository: index.docker.io/hyperledgerlabs/indy-node:1.11.0
+    node:
+      name: university-steward-2
+      ip: 0.0.0.0
+      publicIp: 192.168.49.2
+      port: 15721
+      ambassadorPort: 15721
+    client:
+      publicIp: 192.168.49.2
+      ip: 0.0.0.0
+      port: 15722
+      ambassadorPort: 15722
+    service:
+      type: NodePort
+      ports:
+        nodePort: 15721
+        nodeTargetPort: 15721
+        clientPort: 15722
+        clientTargetPort: 15722
+    configmap:
+      indyConfig: |-
+        NETWORK_NAME = 'bevel'
+        # Enable stdout logging
+        enableStdOutLogging = True
+        logRotationBackupCount = 10
+        # Directory to store ledger.
+        LEDGER_DIR = '/var/lib/indy/data'
+        # Directory to store logs.
+        LOG_DIR = '/var/log/indy'
+        # Directory to store keys.
+        KEYS_DIR = '/var/lib/indy/keys'
+        # Directory to store genesis transactions files.
+        GENESIS_DIR = '/var/lib/indy/genesis'
+        # Directory to store backups.
+        BACKUP_DIR = '/var/lib/indy/backup'
+        # Directory to store plugins.
+        PLUGINS_DIR = '/var/lib/indy/plugins'
+        # Directory to store node info.
+        NODE_INFO_DIR = '/var/lib/indy/data'
+    ambassador:
+      disabled: true
+    vault:
+      address: http://192.168.49.1:8200
+      serviceAccountName: university-university-steward-2-vault-auth
+      keyPath: /keys/bevel/keys/university-steward-2
+      authPath: kubernetes-university-university-steward-2-auth
+      nodeId: university-steward-2
+      role: ro
+    storage:
+      data:
+        storagesize: 3Gi
+        storageClassName: university-minikube-storageclass
+      keys:
+        storagesize: 3Gi
+        storageClassName: university-minikube-storageclass
