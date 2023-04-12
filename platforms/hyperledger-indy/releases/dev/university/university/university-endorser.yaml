@@ -1,0 +1,51 @@
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: university-endorser
+  annotations:
+    fluxcd.io/automated: "false"
+  namespace: university-ns
+spec:
+  releaseName: university-endorser-faber
+  interval: 1m
+  chart:
+   spec:
+    chart: examples/identity-app/charts/faber
+    sourceRef:
+      kind: GitRepository
+      name: flux-bevel
+      namespace: flux-bevel
+  values:
+    metadata:
+      namespace: university-ns
+      name: university-endorser
+    organization:
+      name: university
+    image:
+      pullSecret: regcred
+      pullPolicy: IfNotPresent
+      init:
+        name: certs-init
+        repository: alpine:3.9.4
+      agent:
+        name: university-endorser
+        repository: index.docker.io/hammadahmed85/aries-agents:latest
+    service:
+      ports:
+        service: 15033
+        endpoint: 15034
+        webhook: 15035
+      address: 192.168.49.2
+      ledger: http://192.168.49.2:15010
+      genesis: http://192.168.49.2:15010/genesis
+    vault:
+      address: http://192.168.49.1:8200
+      serviceAccountName: university-university-endorser-vault-auth
+      authPath: kubernetes-university-university-endorser-auth
+      endorserName: university-endorser
+      role: ro
+    storage:
+      size: 128Mi
+      className: university-minikube-storageclass
+    proxy:
+      provider: "minikube"
